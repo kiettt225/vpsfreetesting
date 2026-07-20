@@ -1,26 +1,11 @@
-name: Run Xray Free
-
-on:
-  workflow_dispatch:
-  push:
-    branches: [ "main" ]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup & Run Xray + Cloudflare Tunnel
+- name: Setup & Run Xray + Cloudflare Tunnel
         run: |
           # 1. Tải Xray-core
           wget https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip
           unzip Xray-linux-64.zip -d xray_bin
           
-          # 2. Tạo config VLESS
-          mkdir -p /etc/xray
-          cat << 'EOF' > /etc/xray/config.json
+          # 2. Tạo config VLESS tại thư mục hiện tại (không dùng /etc/)
+          cat << 'EOF' > config.json
           {
             "log": { "loglevel": "warning" },
             "inbounds": [{
@@ -39,8 +24,8 @@ jobs:
           }
           EOF
 
-          # 3. Chạy Xray ngầm
-          ./xray_bin/xray run -config /etc/xray/config.json &
+          # 3. Chạy Xray ngầm trỏ vào config local
+          ./xray_bin/xray run -config config.json &
 
           # 4. Tải Cloudflare Tunnel và bắn ra public link
           curl -L --output cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64
